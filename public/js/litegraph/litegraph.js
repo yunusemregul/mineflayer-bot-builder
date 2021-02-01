@@ -268,6 +268,10 @@
                 "this.addOutput('out'," +
                 (return_type ? "'" + return_type + "'" : 0) +
                 ");\n";
+            code += `
+            this.addInput('event', LiteGraph.ACTION);
+            this.addOutput('then', LiteGraph.EVENT);
+            `;
             if (properties) {
                 code +=
                     "this.properties = " + JSON.stringify(properties) + ";\n";
@@ -275,13 +279,21 @@
             var classobj = Function(code);
             classobj.title = name.split("/").pop();
             classobj.desc = "Generated from " + func.name;
-            classobj.prototype.onExecute = function onExecute() {
+            /*classobj.prototype.onExecute = function onExecute() {
                 for (var i = 0; i < params.length; ++i) {
                     params[i] = this.getInputData(i);
                 }
                 var r = func.apply(this, params);
                 this.setOutputData(0, r);
-            };
+            };*/
+            classobj.prototype.onAction = function onAction() {
+                for (var i = 0; i < params.length; ++i) {
+                    params[i] = this.getInputData(i);
+                }
+                var r = func.apply(this, params);
+                this.setOutputData(0, r);
+                this.triggerSlot(1);
+            }
             this.registerNodeType(name, classobj);
         },
 

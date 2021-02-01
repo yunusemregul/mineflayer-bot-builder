@@ -4,16 +4,15 @@ function event_bot_spawn() {
 }
 
 event_bot_spawn.title = "bot.on spawn";
-event_bot_spawn.prototype.generateCode = function () {
-    let childrenCode = ""
-
-
-    return `
-        bot.on("spawn", () => {
-            ${childrenCode}
-        })
-    `;
+event_bot_spawn.prototype.onAction = function () {
+    bot.on(
+        "spawn",
+        (() => {
+            this.setOutputData(0, true);
+            this.triggerSlot(0, true);
+            log("spawn");
+        }).bind(this)
+    );
 };
-event_bot_spawn.prototype.onExecute = function () {};
 
 LiteGraph.registerNodeType("mineflayer/events/spawn", event_bot_spawn);
