@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#controls {
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 8;
+    background-color: #333;
+}
+
+.btn {
+    border: none;
+    outline:none;
+    padding: 6;
+    background-color: #222;
+    cursor: pointer;
+    height: 32;
+    color: white;
+}
+
+.btn:hover {
+    background-color: #444;
+}
