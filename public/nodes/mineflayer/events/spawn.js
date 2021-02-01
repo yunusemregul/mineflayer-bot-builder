@@ -1,10 +1,10 @@
-function event_bot_spawn() {
+function onSpawn() {
     this.addInput("events", LiteGraph.ACTION);
     this.addOutput("event", LiteGraph.EVENT);
 }
 
-event_bot_spawn.title = "bot.on spawn";
-event_bot_spawn.prototype.onAction = function () {
+onSpawn.title = "bot.on spawn";
+onSpawn.prototype.onAction = function () {
     bot.on(
         "spawn",
         (() => {
@@ -15,4 +15,4 @@ event_bot_spawn.prototype.onAction = function () {
     );
 };
 
-LiteGraph.registerNodeType("mineflayer/events/spawn", event_bot_spawn);
+LiteGraph.registerNodeType("mineflayer/bot.on/spawn", onSpawn);

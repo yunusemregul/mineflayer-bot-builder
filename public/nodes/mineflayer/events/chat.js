@@ -1,13 +1,13 @@
-function event_bot_chat() {
+function onChat() {
     this.addInput("events", LiteGraph.ACTION);
     this.addOutput("username", "string");
     this.addOutput("message", "string");
     this.addOutput("event", LiteGraph.EVENT);
 }
 
-event_bot_chat.title = "bot.on chat";
-event_bot_chat.prototype.onStart = function () {};
-event_bot_chat.prototype.onAction = function () {
+onChat.title = "bot.on chat";
+onChat.prototype.onStart = function () {};
+onChat.prototype.onAction = function () {
     bot.on(
         "chat",
         ((username, message) => {
@@ -20,4 +20,4 @@ event_bot_chat.prototype.onAction = function () {
     );
 };
 
-LiteGraph.registerNodeType("mineflayer/events/chat", event_bot_chat);
+LiteGraph.registerNodeType("mineflayer/bot.on/chat", onChat);
