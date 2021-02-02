@@ -1,5 +1,5 @@
 function onChat() {
-    this.addInput("events", LiteGraph.ACTION);
+    this.addInput("bot", LiteGraph.ACTION);
     this.addOutput("username", "string");
     this.addOutput("message", "string");
     this.addOutput("event", LiteGraph.EVENT);

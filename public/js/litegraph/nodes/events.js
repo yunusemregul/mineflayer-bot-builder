@@ -31,7 +31,7 @@
     TriggerEvent.title = "TriggerEvent";
     TriggerEvent.desc = "Triggers event if input evaluates to true";
 
-    TriggerEvent.prototype.onAction = function(action, param) {
+    TriggerEvent.prototype.onExecute = function(action, param) {
 		var v = this.getInputData(0);
 		var changed = (v != this.prev);
 		if(this.prev === 0)

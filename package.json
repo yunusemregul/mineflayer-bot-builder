@@ -14,6 +14,10 @@
     "electron": "^12.0.0-beta.19"
   },
   "dependencies": {
-    "mineflayer": "^2.41.0"
+    "electron-store": "^7.0.1",
+    "minecraft-data": "^2.74.0",
+    "mineflayer": "^2.41.0",
+    "mineflayer-pathfinder": "^1.4.0",
+    "vec3": "^0.1.7"
   }
 }

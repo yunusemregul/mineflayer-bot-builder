@@ -1,16 +1,18 @@
 function onSpawn() {
-    this.addInput("events", LiteGraph.ACTION);
+    this.addInput("bot", LiteGraph.ACTION);
     this.addOutput("event", LiteGraph.EVENT);
 }
 
 onSpawn.title = "bot.on spawn";
-onSpawn.prototype.onAction = function () {
+onSpawn.prototype.onAction = function (name, param) {
+    log(name, param);
     bot.on(
         "spawn",
         (() => {
-            this.setOutputData(0, true);
-            this.triggerSlot(0, true);
             log("spawn");
+            log(this);
+            this.setOutputData(0, true);
+            this.trigger("event", true);
         }).bind(this)
     );
 };

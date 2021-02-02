@@ -4,6 +4,13 @@
     overflow: hidden;
 }
 
+body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0 auto;
+    background: #222;
+}
+
 #controls {
     position: fixed;
     left: 0;

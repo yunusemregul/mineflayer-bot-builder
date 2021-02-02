@@ -218,6 +218,36 @@
 	                    this.node_types_by_file_extension[ ext.toLowerCase() ] = base_class;
                 }
             }
+
+            if (base_class.prototype.onExecute)
+            {
+                console.warn(
+                    "LiteGraph node class " +
+                        type +
+                        " has onExecute method, usage of onExecute s are removed due to need of event based graphs for mineflayer"
+                );
+
+            }
+
+            if (base_class.prototype.onAction) {
+                base_class.prototype._onAction = base_class.prototype.onAction
+                base_class.prototype.onAction = function(name, param){
+                    this._onAction(name, param)
+                    this.trigger("then")
+                }
+            }
+
+            if (base_class.prototype.onExecute && !base_class.prototype.onAction) {
+                base_class.prototype._onAction = base_class.prototype.onExecute
+                base_class.prototype.onAction = function(event)
+                {
+                    if (event==="event")
+                    {
+                        this._onAction()
+                        this.trigger("then")
+                    }
+                }
+            }
         },
 
         /**
@@ -268,10 +298,6 @@
                 "this.addOutput('out'," +
                 (return_type ? "'" + return_type + "'" : 0) +
                 ");\n";
-            code += `
-            this.addInput('event', LiteGraph.ACTION);
-            this.addOutput('then', LiteGraph.EVENT);
-            `;
             if (properties) {
                 code +=
                     "this.properties = " + JSON.stringify(properties) + ";\n";
@@ -292,7 +318,6 @@
                 }
                 var r = func.apply(this, params);
                 this.setOutputData(0, r);
-                this.triggerSlot(1);
             }
             this.registerNodeType(name, classobj);
         },
@@ -382,7 +407,7 @@
                 node.pos = LiteGraph.DEFAULT_POSITION.concat();
             }
             if (!node.mode) {
-                node.mode = LiteGraph.ALWAYS;
+                node.mode = LiteGraph.ON_EVENT;
             }
 
             //extra options
@@ -391,6 +416,35 @@
                     node[i] = options[i];
                 }
             }
+
+            log(node);
+            
+            if (node.findInputSlot("event")===-1)
+            {
+                node.addInput('event', LiteGraph.ACTION);
+            }
+            else
+            {
+                console.warn(
+                    "LiteGraph node class " +
+                        type +
+                        " already has event input"
+                );
+            }
+
+            if (node.findOutputSlot("then")===-1)
+            {
+                node.addOutput('then', LiteGraph.EVENT);
+            }
+            else
+            {
+                console.warn(
+                    "LiteGraph node class " +
+                        type +
+                        " already has then output"
+                );
+            }
+
 
             return node;
         },
@@ -1236,7 +1290,7 @@
      * @param {Array} params parameters in array format
      */
     LGraph.prototype.sendEventToAllNodes = function(eventname, params, mode) {
-        mode = mode || LiteGraph.ALWAYS;
+        mode = mode || LiteGraph.ON_EVENT;
 
         var nodes = this._nodes_in_order ? this._nodes_in_order : this._nodes;
         if (!nodes) {
@@ -2597,6 +2651,7 @@
      */
     LGraphNode.prototype.setOutputData = function(slot, data) {
         if (!this.outputs) {
+            log(this.title + " called setoutputdata too but returning #0");
             return;
         }
 
@@ -2605,11 +2660,13 @@
         //	slot = this.findOutputSlot(slot);
 
         if (slot == -1 || slot >= this.outputs.length) {
+            log(this.title + " called setoutputdata too but returning #1");
             return;
         }
 
         var output_info = this.outputs[slot];
         if (!output_info) {
+            log(this.title + " called setoutputdata too but returning #2");
             return;
         }
 
@@ -2622,7 +2679,10 @@
                 var link_id = this.outputs[slot].links[i];
 				var link = this.graph.links[link_id];
 				if(link)
-					link.data = data;
+				{
+                    link.data = data;
+                    log(this.title + " called setoutputdata");
+                }
             }
         }
     };
@@ -2950,6 +3010,7 @@
      */
     LGraphNode.prototype.trigger = function(action, param) {
         if (!this.outputs || !this.outputs.length) {
+            log(this);
             return;
         }
 
@@ -3301,9 +3362,9 @@
      * @return {number} the total size
      */
     LGraphNode.prototype.computeSize = function(out) {
-        if (this.constructor.size) {
+        /*if (this.constructor.size) {
             return this.constructor.size.concat();
-        }
+        }*/
 
         var rows = Math.max(
             this.inputs ? this.inputs.length : 1,
@@ -3360,11 +3421,12 @@
         }
 
         //compute height using widgets height
-        if( this.widgets_up )
+        /*if( this.widgets_up )
             size[1] = Math.max( size[1], widgets_height );
         else if( this.widgets_start_y != null )
             size[1] = Math.max( size[1], widgets_height + this.widgets_start_y );
-        else
+        else*/
+
             size[1] += widgets_height;
 
         function compute_text_size(text) {
@@ -7482,13 +7544,20 @@ LGraphNode.prototype.executeAction = function(action)
                     var pos = node.getConnectionPos(true, i, slot_pos);
                     pos[0] -= node.pos[0];
                     pos[1] -= node.pos[1];
+
                     if (max_y < pos[1] + LiteGraph.NODE_SLOT_HEIGHT * 0.5) {
                         max_y = pos[1] + LiteGraph.NODE_SLOT_HEIGHT * 0.5;
                     }
 
                     ctx.beginPath();
 
-                    if (
+                    if (slot.shape === LiteGraph.ARROW_SHAPE || slot.name==="event") {
+                        ctx.moveTo(pos[0] + 8, pos[1] + 0.5);
+                        ctx.lineTo(pos[0] - 4, pos[1] + 6 + 0.5);
+                        ctx.lineTo(pos[0] - 4, pos[1] - 6 + 0.5);
+                        ctx.closePath();
+                    }
+                    else if (
                         slot.type === LiteGraph.EVENT ||
                         slot.shape === LiteGraph.BOX_SHAPE
                     ) {
@@ -7507,11 +7576,6 @@ LGraphNode.prototype.executeAction = function(action)
                                 10
                             );
                         }
-                    } else if (slot.shape === LiteGraph.ARROW_SHAPE) {
-                        ctx.moveTo(pos[0] + 8, pos[1] + 0.5);
-                        ctx.lineTo(pos[0] - 4, pos[1] + 6 + 0.5);
-                        ctx.lineTo(pos[0] - 4, pos[1] - 6 + 0.5);
-                        ctx.closePath();
                     } else {
 						if(low_quality)
 	                        ctx.rect(pos[0] - 4, pos[1] - 4, 8, 8 ); //faster
@@ -7562,7 +7626,13 @@ LGraphNode.prototype.executeAction = function(action)
                     ctx.beginPath();
                     //ctx.rect( node.size[0] - 14,i*14,10,10);
 
-                    if (
+                    if (slot.shape === LiteGraph.ARROW_SHAPE || slot.name==="then") {
+                        ctx.moveTo(pos[0] + 8, pos[1] + 0.5);
+                        ctx.lineTo(pos[0] - 4, pos[1] + 6 + 0.5);
+                        ctx.lineTo(pos[0] - 4, pos[1] - 6 + 0.5);
+                        ctx.closePath();
+                    }
+                    else if (
                         slot.type === LiteGraph.EVENT ||
                         slot.shape === LiteGraph.BOX_SHAPE
                     ) {
@@ -7581,11 +7651,6 @@ LGraphNode.prototype.executeAction = function(action)
                                 10
                             );
                         }
-                    } else if (slot.shape === LiteGraph.ARROW_SHAPE) {
-                        ctx.moveTo(pos[0] + 8, pos[1] + 0.5);
-                        ctx.lineTo(pos[0] - 4, pos[1] + 6 + 0.5);
-                        ctx.lineTo(pos[0] - 4, pos[1] - 6 + 0.5);
-                        ctx.closePath();
                     } else {
 						if(low_quality)
 	                        ctx.rect(pos[0] - 4, pos[1] - 4, 8, 8 );
@@ -7622,9 +7687,9 @@ LGraphNode.prototype.executeAction = function(action)
 
             if (node.widgets) {
 				var widgets_y = max_y;
-                if (horizontal || node.widgets_up) {
+                /*if (horizontal || node.widgets_up) {
                     widgets_y = 2;
-                }
+                }*/
 				if( node.widgets_start_y != null )
                     widgets_y = node.widgets_start_y;
                 this.drawNodeWidgets(

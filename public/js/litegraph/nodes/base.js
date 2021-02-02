@@ -942,13 +942,13 @@
 
     function ArrayElement() {
         this.addInput("array", "array,table,string");
-        this.addInput("index", "number");
+        this.addInput("index", "number,string");
         this.addOutput("value", "");
 		this.addProperty("index",0);
     }
 
-    ArrayElement.title = "Array[i]";
-    ArrayElement.desc = "Returns an element from an array";
+    ArrayElement.title = "Array[index]";
+    ArrayElement.desc = "Returns an element from an array. Index must be number or string.";
 
     ArrayElement.prototype.onExecute = function() {
         var array = this.getInputData(0);
@@ -957,7 +957,11 @@
 			index = this.properties.index;
 		if(array == null || index == null )
 			return;
-        this.setOutputData(0, array[Math.floor(Number(index))] );
+        
+        if (typeof index === "number")
+            this.setOutputData(0, array[Math.floor(Number(index))] );
+        else
+            this.setOutputData(0, array[index] );
     };
 
     LiteGraph.registerNodeType("basic/array[]", ArrayElement);
@@ -999,7 +1003,6 @@
         this.addProperty("value", "");
         this.widget = this.addWidget("text","prop.","",this.setValue.bind(this) );
         this.widgets_up = true;
-        this.size = [140, 30];
         this._value = null;
     }
 

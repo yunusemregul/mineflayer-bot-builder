@@ -1,17 +1,17 @@
-function CreateBot() {
+function createBot() {
     this.host = this.addWidget("string", "host", "localhost", "host");
-    this.port = this.addWidget("string", "port", "50200", "port"); // 25565
+    this.port = this.addWidget("string", "port", "52879", "port"); // 25565
     this.username = this.addWidget("string", "username", "mineflayer", "username");
     this.password = this.addWidget("string", "password", "", "password");
     this.version = this.addWidget("string", "version", "auto", "version");
 
-    this.addOutput("events", LiteGraph.EVENT);
+    this.addOutput("bot", LiteGraph.EVENT);
 }
 
 let bot;
 
-CreateBot.title = "mineflayer.createBot";
-CreateBot.prototype.onStart = function () {
+createBot.title = "mineflayer.createBot";
+createBot.prototype.onStart = function () {
     bot = mineflayer.createBot({
         host: this.host.value,
         port: this.port.value,
@@ -21,17 +21,18 @@ CreateBot.prototype.onStart = function () {
     });
 
     bot.on("connect", () => {
-        this.triggerSlot(0);
         log("connect");
+        this.setOutputData(0, bot);
+        this.trigger("bot", bot);
     });
 
     bot.on("error", (err) => {
         log(err);
     });
 };
-CreateBot.prototype.onStop = function () {
+createBot.prototype.onStop = function () {
     log("destroying the bot");
     bot.end();
-}
+};
 
-LiteGraph.registerNodeType("mineflayer/createBot", CreateBot);
+LiteGraph.registerNodeType("mineflayer/createBot", createBot);
