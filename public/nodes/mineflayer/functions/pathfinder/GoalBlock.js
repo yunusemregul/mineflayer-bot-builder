@@ -3,7 +3,7 @@ var GoalBlock;
 function goalBlockNode() {
     GoalBlock = require("mineflayer-pathfinder").goals.GoalBlock;
 
-    this.addInput("XYZ", "vec3");
+    this.addInput("vec3", "vec3");
     this.addOutput("GoalBlock", "goal");
 }
 

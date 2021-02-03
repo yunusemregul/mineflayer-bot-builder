@@ -1,6 +1,6 @@
 function createBot() {
     this.host = this.addWidget("string", "host", "localhost", "host");
-    this.port = this.addWidget("string", "port", "52879", "port"); // 25565
+    this.port = this.addWidget("string", "port", "25565", "port"); // 25565
     this.username = this.addWidget("string", "username", "mineflayer", "username");
     this.password = this.addWidget("string", "password", "", "password");
     this.version = this.addWidget("string", "version", "auto", "version");
